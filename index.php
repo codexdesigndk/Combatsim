@@ -171,10 +171,6 @@
                                 // If there in range, it will attack, if not, then it will move closer and end its turn.
                                 if (($Attackers[$rowcount]['Position'] + $Defenders[$defrowcount]['Position']) <= $Attackers[$rowcount]['Range']) {
 
-                                    /**
-                                     * This is test code here below for recalculating damage. (Work on this now)
-                                     */
-                                    $Attackers[$rowcount]['Combined Damage'] = ($AttackingUnits[$rowcount] * $Attackers[$rowcount]['Attack']) * (rand(95, 105) / 100);
 
                                     // echo "Attackers: " . $Attackers[$rowcount]['Name'] . "<br>";
                                     // echo "Attack<br>";
@@ -197,6 +193,11 @@
                                     // Deduct deaths from Unit Type
                                     $Defenders[$defrowcount]['Total Units'] -= $Defenders[$defrowcount]['DeathsLastRound'];
                                     // echo "<br>";
+
+                                    if ($Defenders[$defrowcount]['Total Units'] < 0) {
+                                        $Defenders[$defrowcount]['DeathsLastRound'] += $Defenders[$defrowcount]['Total Units'];
+                                        $Defenders[$defrowcount]['Total Units'] = 0;
+                                    }
 
                                     // Deduct deaths from total
                                     $DefendersTotal -= $Defenders[$defrowcount]['DeathsLastRound'];
@@ -239,7 +240,7 @@
 
                                     // Calculate Attackers Deaths
                                     $Attackers[$atkrowcount]['DeathsLastRound'] = floor(($Defenders[$defrowcount]['Combined Damage'] / $Attackers[$atkrowcount]['Hitpoints']));
-                                    echo "Deaths: " . $Attackers[$atkrowcount]['DeathsLastRound'] . "<br>";
+                                    // echo "Deaths: " . $Attackers[$atkrowcount]['DeathsLastRound'] . "<br>";
 
                                     // Calculate remaining units
                                     $Attackers[$atkrowcount]['RemainingUnits'] = ceil(($Attackers[$atkrowcount]['Combined Hitpoints'] / $Attackers[$atkrowcount]['Hitpoints']));
@@ -248,6 +249,11 @@
                                     // Deduct deaths from Unit Type
                                     $Attackers[$atkrowcount]['Total Units'] -= $Attackers[$atkrowcount]['DeathsLastRound'];
                                     // echo "<br>";
+
+                                    if ($Attackers[$atkrowcount]['Total Units'] < 0) {
+                                        $Attackers[$atkrowcount]['DeathsLastRound'] += $Attackers[$atkrowcount]['Total Units'];
+                                        $Attackers[$atkrowcount]['Total Units'] = 0;
+                                    }
 
                                     // Deduct deaths from total
                                     $AttackersTotal -= $Attackers[$atkrowcount]['DeathsLastRound'];
@@ -264,6 +270,15 @@
                             }
                         }
                     }
+                }
+
+                for ($count = 0; $count < count($Attackers); $count++) {
+                    $Attackers[$count]['Combined Damage'] = ($Attackers[$count]['Total Units'] * $Attackers[$count]['Attack']) * (rand(95, 105) / 100);
+                }
+
+                for ($count = 0; $count < count($Defenders); $count++) {
+                    $Defenders[$count]['Combined Damage'] = ($Defenders[$count]['Total Units'] * $Defenders[$count]['Attack']) * (rand(95, 105) / 100);
+
                 }
 
 
@@ -294,12 +309,8 @@
             }
 
 
-
-            echo "<h1></h1>";
-
             echo "</tbody>";
             echo "</table>";
-
 
         }//end submit();
 
