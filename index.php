@@ -36,7 +36,7 @@
                        required="yes">
             </div>
             <div class="col-sm-4 well">
-                <div class="col-xs-2 col-xs-offset-4">
+                <div class="col-xs-2 col-xs-offset-5">
                     <input class="btn btn-primary" type="submit" name="submit" value="Battle!"/><br><br>
                     <a class="btn btn-danger" href="index.php">Reset</a>
                 </div>
@@ -165,43 +165,51 @@
 
                         // Counts how many Defending Unit Types there is, and if the type have any units in them.
                         for ($defrowcount = 0; $defrowcount < count($Defenders); $defrowcount++) {
-                            if ($Defenders[$defrowcount]['Total Units'] > 0)
+                            if ($Defenders[$defrowcount]['Total Units'] > 0) {
 
                                 // Checks each attacking units against all defending units of their in range or not
                                 // If there in range, it will attack, if not, then it will move closer and end its turn.
                                 if (($Attackers[$rowcount]['Position'] + $Defenders[$defrowcount]['Position']) <= $Attackers[$rowcount]['Range']) {
 
-                                    echo "Attackers: " . $Attackers[$rowcount]['Name'] . "<br>";
-                                    echo "Attack<br>";
+                                    /**
+                                     * This is test code here below for recalculating damage. (Work on this now)
+                                     */
+                                    $Attackers[$rowcount]['Combined Damage'] = ($AttackingUnits[$rowcount] * $Attackers[$rowcount]['Attack']) * (rand(95, 105) / 100);
 
-                                    echo "Units Before Fight: " . $Defenders[$defrowcount]['Total Units'] . "<br>";
+                                    // echo "Attackers: " . $Attackers[$rowcount]['Name'] . "<br>";
+                                    // echo "Attack<br>";
+
+                                    // echo "Units Before Fight: " . $Defenders[$defrowcount]['Total Units'] . "<br>";
 
                                     // Give Attacking Unit's Damage to Defending Unit's Hitpoints.
                                     $Defenders[$defrowcount]['Combined Hitpoints'] -= $Attackers[$rowcount]['Combined Damage'];
 
-                                    //Deaths
-                                    $Defenders[$defrowcount]['DeathsLastRound'] = ($Attackers[$rowcount]['Combined Damage'] / $Defenders[$defrowcount]['Hitpoints']);
-                                    echo "Deaths: " . $Defenders[$defrowcount]['DeathsLastRound'] . "<br>";
+                                    // Calculate Defenders Deaths (NEED Better way here to calculate deaths)
+                                    $Defenders[$defrowcount]['DeathsLastRound'] = floor(($Attackers[$rowcount]['Combined Damage'] / $Defenders[$defrowcount]['Hitpoints']));
 
-                                    // Remaining Units
-                                    $Defenders[$defrowcount]['RemainingUnits'] = ($Defenders[$defrowcount]['Combined Hitpoints'] / $Defenders[$defrowcount]['Hitpoints']);
-                                    echo "Remaining Units: " . $Defenders[$defrowcount]['RemainingUnits'] . "<br>";
+                                    // echo "Deaths: " . $Defenders[$defrowcount]['DeathsLastRound'] . "<br>";
+
+                                    // Calculate remaining units
+                                    $Defenders[$defrowcount]['RemainingUnits'] = ceil(($Defenders[$defrowcount]['Combined Hitpoints'] / $Defenders[$defrowcount]['Hitpoints']));
+
+                                    // echo "Remaining Units: " . $Defenders[$defrowcount]['RemainingUnits'] . "<br>";
 
                                     // Deduct deaths from Unit Type
                                     $Defenders[$defrowcount]['Total Units'] -= $Defenders[$defrowcount]['DeathsLastRound'];
-                                    echo "<br>";
+                                    // echo "<br>";
 
                                     // Deduct deaths from total
                                     $DefendersTotal -= $Defenders[$defrowcount]['DeathsLastRound'];
-                                } else {
 
-                                    echo "Attackers: " . $Attackers[$rowcount]['Name'] . "<br>";
-                                    echo "Move<br>";
+                                } else { // Move Phrase
+                                    // echo "Attackers: " . $Attackers[$rowcount]['Name'] . "<br>";
+                                    // echo "Move<br>";
 
                                     // Move Unit´s Range by deducting it from its current position.
                                     $Attackers[$rowcount]['Position'] -= $Attackers[$rowcount]['Speed'];
-                                    echo "<br>";
+                                    // echo "<br>";
                                 }
+                            }
                         }
                     }
                 }
@@ -214,43 +222,46 @@
 
                         // Counts how many Attacking Unit types there is, and if the type have any units in them.
                         for ($atkrowcount = 0; $atkrowcount < count($Attackers); $atkrowcount++) {
-                            if ($Attackers[$atkrowcount]['Total Units'] > 0)
+                            if ($Attackers[$atkrowcount]['Total Units'] > 0) {
 
                                 // Checks each attacking units against all defending units of their in range or not
                                 // If there in range, it will attack, if not, then it will move closer and end its turn.
                                 if (($Defenders[$defrowcount]['Position'] + $Attackers[$atkrowcount]['Position']) <= $Defenders[$defrowcount]['Range']) {
 
-                                    echo "Defenders: " . $Defenders[$defrowcount]['Name'] . "<br>";
-                                    echo "Attack<br>";
+                                    // echo "Defenders: " . $Defenders[$defrowcount]['Name'] . "<br>";
+                                    // echo "Attack<br>";
 
-                                    echo "Units Before Fight: " . $Attackers[$atkrowcount]['Total Units'] . "<br>";
+                                    // echo "Units Before Fight: " . $Attackers[$atkrowcount]['Total Units'] . "<br>";
 
                                     // Give Attacking Unit's Damage to Defending Unit's Hitpoints.
                                     $Attackers[$atkrowcount]['Combined Hitpoints'] -= $Defenders[$defrowcount]['Combined Damage'];
+                                    // echo "Hitpoints of attackers after: ".$Attackers[$atkrowcount]['Combined Hitpoints'] . "<br>";
 
-                                    //Deaths
-                                    $Attackers[$atkrowcount]['DeathsLastRound'] = ($Defenders[$defrowcount]['Combined Damage'] / $Attackers[$atkrowcount]['Hitpoints']);
+                                    // Calculate Attackers Deaths
+                                    $Attackers[$atkrowcount]['DeathsLastRound'] = floor(($Defenders[$defrowcount]['Combined Damage'] / $Attackers[$atkrowcount]['Hitpoints']));
                                     echo "Deaths: " . $Attackers[$atkrowcount]['DeathsLastRound'] . "<br>";
 
-                                    // Remaining Units
-                                    $Attackers[$atkrowcount]['RemainingUnits'] = ($Attackers[$atkrowcount]['Combined Hitpoints'] / $Attackers[$atkrowcount]['Hitpoints']);
-                                    echo "Remaining Units: " . $Attackers[$atkrowcount]['RemainingUnits'] . "<br>";
+                                    // Calculate remaining units
+                                    $Attackers[$atkrowcount]['RemainingUnits'] = ceil(($Attackers[$atkrowcount]['Combined Hitpoints'] / $Attackers[$atkrowcount]['Hitpoints']));
+                                    // echo "Remaining Units: " . $Attackers[$atkrowcount]['RemainingUnits'] . "<br>";
 
                                     // Deduct deaths from Unit Type
                                     $Attackers[$atkrowcount]['Total Units'] -= $Attackers[$atkrowcount]['DeathsLastRound'];
-                                    echo "<br>";
+                                    // echo "<br>";
 
                                     // Deduct deaths from total
                                     $AttackersTotal -= $Attackers[$atkrowcount]['DeathsLastRound'];
+
                                 } else {
 
-                                    echo "Defenders: " . $Defenders[$defrowcount]['Name'] . "<br>";
-                                    echo "Move<br>";
+                                    // echo "Defenders: " . $Defenders[$defrowcount]['Name'] . "<br>";
+                                    // echo "Move<br>";
 
                                     // Move Unit´s Range by deducting it from its current position.
                                     $Defenders[$defrowcount]['Position'] -= $Defenders[$defrowcount]['Speed'];
-                                    echo "<br>";
+                                    // echo "<br>";
                                 }
+                            }
                         }
                     }
                 }
@@ -262,20 +273,27 @@
 
                 echo "<tr>";
                 echo "<td>";
-                echo $Attackers[0]['Name'] . ": " . floor($Attackers[0]['Total Units']) . "<br>";
-                echo $Attackers[1]['Name'] . ": " . floor($Attackers[1]['Total Units']) . "<br>";
+                echo $Attackers[0]['Name'] . ": " . $Attackers[0]['Total Units'] . "<br>";
+                echo $Attackers[1]['Name'] . ": " . $Attackers[1]['Total Units'] . "<br>";
                 echo "</td>";
-                echo "<td></td>";
-                echo "<td>" . $round . "</td>";
-                echo "<td></td>";
                 echo "<td>";
-                echo $Defenders[0]['Name'] . ": " . floor($Defenders[0]['Total Units']) . "<br>";
-                echo $Defenders[1]['Name'] . ": " . floor($Defenders[1]['Total Units']) . "<br>";
+                echo floor(isset($Attackers[0]['DeathsLastRound']) ? $Attackers[0]['DeathsLastRound'] : 0) . "<br>";
+                echo floor(isset($Attackers[1]['DeathsLastRound']) ? $Attackers[1]['DeathsLastRound'] : 0);
+                echo "</td>";
+                echo "<td>" . $round . "</td>";
+                echo "<td>";
+                echo floor(isset($Defenders[0]['DeathsLastRound']) ? $Defenders[0]['DeathsLastRound'] : 0) . "<br>";
+                echo floor(isset($Defenders[1]['DeathsLastRound']) ? $Defenders[1]['DeathsLastRound'] : 0);
+                echo "</td>";                echo "<td>";
+                echo $Defenders[0]['Name'] . ": " . $Defenders[0]['Total Units'] . "<br>";
+                echo $Defenders[1]['Name'] . ": " . $Defenders[1]['Total Units'] . "<br>";
                 echo "</td>";
                 echo "</tr>";
 
 
             }
+
+
 
             echo "<h1></h1>";
 
