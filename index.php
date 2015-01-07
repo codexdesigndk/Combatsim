@@ -15,73 +15,71 @@
     <!-- Custom styles for this template -->
     <link href="css/custom.css" rel="stylesheet">
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="includes/DataTables-1.10.4/media/css/jquery.dataTables.css">
+
+    <!-- jQuery -->
+    <script type="text/javascript" charset="utf8" src="includes/DataTables-1.10.4/media/js/jquery.js"></script>
+
+    <!-- DataTables -->
+    <script type="text/javascript" charset="utf8" src="includes/DataTables-1.10.4/media/js/jquery.dataTables.js"></script>
+
 </head>
 <body>
 
-<form method="post">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="col-xs-4 well text-center">
-                <h2 style="color:blue;">Attackers</h2>
-                <label>Soldiers </label>
-                <input type="number" name="A_Unit_1" placeholder="0" value="<?php echo $_POST['A_Unit_1'] ?>"
-                       required="yes"><br>
-                <label>Snipers </label>
-                <input type="number" name="A_Unit_2" placeholder="0" value="<?php echo $_POST['A_Unit_2'] ?>"
-                       required="yes">
-            </div>
-            <div class="col-sm-4 well">
-                <div class="col-xs-2 col-xs-offset-5">
-                    <input class="btn btn-primary" type="submit" name="submit" value="Battle!"/><br><br>
-                    <a class="btn btn-danger" href="index.php">Reset</a>
-                </div>
-            </div>
-            <div class="col-xs-4 well text-center">
-                <h2 style="color:red;">Defenders</h2>
-                <label>Soldiers </label>
-                <input type="number" name="D_Unit_1" placeholder="0" value="<?php echo $_POST['D_Unit_1'] ?>"
-                       required="yes"><br>
-                <label>Snipers </label>
-                <input type="number" name="D_Unit_2" placeholder="0" value="<?php echo $_POST['D_Unit_2'] ?>"
-                       required="yes">
-            </div>
-        </div>
-    </div>
-</form>
 
 <div class="row">
-    <div class="col-xs-10 col-xs-offset-1 text-center">
+    <div class="col-xs-12 well">
+        <form method="post">
+            <div class="col-xs-4">
+                <h2 style="color:red;">Attackers</h2>
+                <div class="col-xs-6">
+                    <label>Soldiers </label><br>
+                    <label>Snipers </label><br>
+                    <label>Grenadiers </label>
+                </div>
+                <div class="col-xs-6">
+                    <input type="number" name="A_Unit_1" placeholder="0" value="<?php echo $_POST['A_Unit_1'] ?>" required="yes"><br>
+                    <input type="number" name="A_Unit_2" placeholder="0" value="<?php echo $_POST['A_Unit_2'] ?>" required="yes"><br>
+                    <input type="number" name="A_Unit_3" placeholder="0" value="<?php echo $_POST['A_Unit_3'] ?>" required="yes">
+                </div>
+            </div>
+            <div class="col-xs-4 text-center">
+                <input class="btn btn-primary" type="submit" name="submit" value="Battle!"/><br><br>
+                <a class="btn btn-danger" href="index.php">Reset</a>
+            </div>
+            <div class="col-xs-4">
+                <h2 style="color:blue;">Defenders</h2>
+                <div class="col-xs-6">
+                    <label>Soldiers </label><br>
+                    <label>Snipers </label><br>
+                    <label>Grenadiers </label>
+                </div>
+                <div class="col-xs-6">
+                    <input type="number" name="D_Unit_1" placeholder="0" value="<?php echo $_POST['D_Unit_1'] ?>" required="yes"><br>
+                    <input type="number" name="D_Unit_2" placeholder="0" value="<?php echo $_POST['D_Unit_2'] ?>" required="yes"><br>
+                    <input type="number" name="D_Unit_3" placeholder="0" value="<?php echo $_POST['A_Unit_3'] ?>" required="yes">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-xs-8 col-xs-offset-2 text-center">
         <?php
 
         if (isset($_POST['submit'])) {
-
             $round = 0;
-            //Set army for both teams
-            $AttackingUnits = array($_POST['A_Unit_1'], $_POST['A_Unit_2']);
-            $DefendingUnits = array($_POST['D_Unit_1'], $_POST['D_Unit_2']);
 
-            echo "<table class='table'>";
-            echo "<thead>";
-            echo "<tr>" . "<th>Attackers</th>" . "<th>Deaths</th>" . "<th>Round</th>" . "<th>Deaths</th>" . "<th>Defenders</th>";
-            echo "</thead>";
-            echo "<tbody>";
-            echo "<tr>";
-            echo "<td></td>";
-            echo "<td>0</td>";
-            echo "<td>" . $round . "</td>";
-            echo "<td>0</td>";
-            echo "<td></td>";
-            echo "</tr>";
+            //Set army for both teams
+            $AttackingUnits = array($_POST['A_Unit_1'], $_POST['A_Unit_2'], $_POST['A_Unit_3']);
+            $DefendingUnits = array($_POST['D_Unit_1'], $_POST['D_Unit_2'], $_POST['D_Unit_3']);
 
             ////// Fetch Units Stats ///////////
             $sql = "SELECT * FROM Units";
             $result = mysqli_query($connection, $sql);
-
 
             // Set Army "Total Units" / "Total Damage" / "Total Hitpoints" for Attackers and Defenders
             $AttackersTotal = 0;
@@ -129,143 +127,95 @@
                 $Defenders[$rowcount]['Position'] = $DefendersMax;
             }
 
-            /*
-            echo "<pre>";
-            print_r($Attackers);
-            echo "</pre>";
-            echo "<pre>";
-            print_r($Defenders);
-            echo "</pre>";
-            */
+            require_once 'MoveAttack.php';
+
+            echo "<table id='Rounds' class='table table-striped table-hover'>";
+            echo "<thead>";
+            echo "<tr>" . "<th>Troop</th>" . "<th>Casualties</th>" . "<th>Round</th>" . "<th>Troop</th>" . "<th>Casualties</th>" . "</tr>";
+            echo "</thead>";
+            echo "<tbody>";
+
 
             /**
              * This is the Move and Attack Phrase.
              *
-             * Attackers code is located first, which results in them being hit first by the defenders
-             * aswell. This is to give advantages to defenders.
              */
-
             // Check if both teams got units left.
             while ($AttackersTotal > 0 && $DefendersTotal > 0) {
 
+                // Attackers vs Defenders Turn
+                $Battle = new MoveAttack($Attackers, $Defenders, $DefendersTotal);
+                list ($Attackers, $Defenders, $DefendersTotal) = $Battle->AttackorMove();
 
-                // Counts how many Attacking Unit types there is, and if the type have any units in them.
-                for ($OuterCount = 0; $OuterCount < count($Attackers); $OuterCount++) {
-                    if ($Attackers[$OuterCount]['Total Units'] > 0) {
+                // Defenders vs Attackers Turn
+                $Battle = new MoveAttack($Defenders, $Attackers, $AttackersTotal);
+                list ($Defenders, $Attackers, $AttackersTotal) = $Battle->AttackorMove();
 
-                        // Counts how many Defending Unit Types there is, and if the type have any units in them.
-                        for ($InnerCount = 0; $InnerCount < count($Defenders); $InnerCount++) {
-                            if ($Defenders[$InnerCount]['Total Units'] > 0) {
-
-                                // Checks each attacking units against all defending units of their in range or not
-                                // If there in range, it will attack, if not, then it will move closer and end its turn.
-                                if (($Attackers[$OuterCount]['Position'] + $Defenders[$InnerCount]['Position']) <= $Attackers[$OuterCount]['Range']) {
-
-                                    // Attack and calculate kills
-                                    $Defenders[$InnerCount]['DeathsLastRound'] = floor((($Attackers[$OuterCount]['Total Units'] * $Attackers[$OuterCount]['Attack']) / $Defenders[$InnerCount]['Hitpoints']));
-
-                                    // Calculate remaining units
-                                    $Defenders[$InnerCount]['Total Units'] -= $Defenders[$InnerCount]['DeathsLastRound'];
-
-                                    // Check if unit is dead and set to 0.
-                                    if ($Defenders[$InnerCount]['Total Units'] < 0) {
-                                        $Defenders[$InnerCount]['DeathsLastRound'] += $Defenders[$InnerCount]['Total Units'];
-                                        $Defenders[$InnerCount]['Total Units'] = 0;
-                                    }
-
-                                    // Deduct deaths from total
-                                    $DefendersTotal -= $Defenders[$InnerCount]['DeathsLastRound'];
-
-                                } else { // Move Phrase
-
-                                    // Move Unit´s Range by deducting it from its current position.
-                                    $Attackers[$OuterCount]['Position'] -= $Attackers[$OuterCount]['Speed'];
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-// Counts how many Defending Unit Types there is, and if the type have any units in them.
-
-
-                for ($OuterCount = 0; $OuterCount < count($Defenders); $OuterCount++) {
-                    if ($Defenders[$OuterCount]['Total Units'] > 0) {
-
-                        // Counts how many Attacking Unit types there is, and if the type have any units in them.
-                        for ($InnerCount = 0; $InnerCount < count($Attackers); $InnerCount++) {
-                            if ($Attackers[$InnerCount]['Total Units'] > 0) {
-
-                                // Checks each attacking units against all defending units of their in range or not
-                                // If there in range, it will attack, if not, then it will move closer and end its turn.
-                                if (($Defenders[$OuterCount]['Position'] + $Attackers[$InnerCount]['Position']) <= $Defenders[$OuterCount]['Range']) {
-
-                                    // Attack and calculate kills
-                                    $Attackers[$InnerCount]['DeathsLastRound'] = floor((($Defenders[$OuterCount]['Total Units'] * $Defenders[$OuterCount]['Attack']) / $Attackers[$InnerCount]['Hitpoints']));
-
-                                    // Calculate remaining units
-                                    $Attackers[$InnerCount]['Total Units'] -= $Attackers[$InnerCount]['DeathsLastRound'];
-
-                                    // Check if unit is dead and set to 0.
-                                    if ($Attackers[$InnerCount]['Total Units'] < 0) {
-                                        $Attackers[$InnerCount]['DeathsLastRound'] += $Attackers[$InnerCount]['Total Units'];
-                                        $Attackers[$InnerCount]['Total Units'] = 0;
-                                    }
-
-                                    // Deduct deaths from total
-                                    $AttackersTotal -= $Attackers[$InnerCount]['DeathsLastRound'];
-
-                                } else {
-
-                                    // Move Unit´s Range by deducting it from its current position.
-                                    $Defenders[$OuterCount]['Position'] -= $Defenders[$OuterCount]['Speed'];
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-
+                /**
+                 * Setting variables for the Results Window
+                 */
 
 
                 // Increase Round for each run
                 $round++;
-
                 echo "<tr>";
                 echo "<td>";
-                echo $Attackers[0]['Name'] . ": " . $Attackers[0]['Total Units'] . "<br>";
-                echo $Attackers[1]['Name'] . ": " . $Attackers[1]['Total Units'] . "<br>";
+                for ($Count = 0; $Count < count($Attackers); $Count++) {
+                    echo $Attackers[$Count]['Name'] . ": " . $Attackers[$Count]['Total Units'] . "<br>";
+                }
                 echo "</td>";
                 echo "<td>";
-                echo floor(isset($Attackers[0]['DeathsLastRound']) ? $Attackers[0]['DeathsLastRound'] : 0) . "<br>";
-                echo floor(isset($Attackers[1]['DeathsLastRound']) ? $Attackers[1]['DeathsLastRound'] : 0);
+                for ($Count = 0; $Count < count($Attackers); $Count++) {
+                    echo floor(isset($Attackers[$Count]['DeathsLastRound']) ? $Attackers[$Count]['DeathsLastRound'] : 0) . "<br>";
+                    if ($Attackers[$Count]['Total Units'] == 0 && (isset($Attackers[$Count]['DeathsLastRound']))) {
+                        $Attackers[$Count]['DeathsLastRound'] = 0;
+                    }
+                }
                 echo "</td>";
                 echo "<td>" . $round . "</td>";
                 echo "<td>";
-                echo floor(isset($Defenders[0]['DeathsLastRound']) ? $Defenders[0]['DeathsLastRound'] : 0) . "<br>";
-                echo floor(isset($Defenders[1]['DeathsLastRound']) ? $Defenders[1]['DeathsLastRound'] : 0);
-                echo "</td>";                echo "<td>";
-                echo $Defenders[0]['Name'] . ": " . $Defenders[0]['Total Units'] . "<br>";
-                echo $Defenders[1]['Name'] . ": " . $Defenders[1]['Total Units'] . "<br>";
+                for ($Count = 0; $Count < count($Defenders); $Count++) {
+                    echo $Defenders[$Count]['Name'] . ": " . $Defenders[$Count]['Total Units'] . "<br>";
+                }
+                echo "</td>";
+                echo "<td>";
+                for ($Count = 0; $Count < count($Attackers); $Count++) {
+                    echo floor(isset($Defenders[$Count]['DeathsLastRound']) ? $Defenders[$Count]['DeathsLastRound'] : 0) . "<br>";
+                    if ($Defenders[$Count]['Total Units'] == 0 && (isset($Defenders[$Count]['DeathsLastRound']))) {
+                        $Defenders[$Count]['DeathsLastRound'] = 0;
+                    }
+                }
                 echo "</td>";
                 echo "</tr>";
-
-
             }
-
-
             echo "</tbody>";
             echo "</table>";
-
         }//end submit();
-
 
         ?>
     </div>
+    <script>
+        $(function(){
+            $("#Rounds").dataTable();
+        })
+    </script>
 </div>
+
+
+<div class="row">
+    <div class="col-xs-8 col-xs-offset-2">
+        <div class="col-xs-12 well">
+        howdy
+        <?php
+        echo "<p>";
+        echo $Defenders[1]['Total Units'];
+        echo "</p>";
+
+        ?>
+        </div>
+    </div>
+</div>
+
 
 </body>
 </html>

@@ -146,13 +146,87 @@
              */
 
             // Check if both teams got units left.
-            if ($AttackersTotal > 0 && $DefendersTotal > 0) {
+            while ($AttackersTotal > 0 && $DefendersTotal > 0) {
 
-                include 'MoveAttack.php';
 
-                $class = new MoveAttack('hej ', 'med ', 'dig');
+                // Counts how many Attacking Unit types there is, and if the type have any units in them.
+                for ($OuterCount = 0; $OuterCount < count($Attackers); $OuterCount++) {
+                    if ($Attackers[$OuterCount]['Total Units'] > 0) {
 
-                echo $class->resultat();
+                        // Counts how many Defending Unit Types there is, and if the type have any units in them.
+                        for ($InnerCount = 0; $InnerCount < count($Defenders); $InnerCount++) {
+                            if ($Defenders[$InnerCount]['Total Units'] > 0) {
+
+                                // Checks each attacking units against all defending units of their in range or not
+                                // If there in range, it will attack, if not, then it will move closer and end its turn.
+                                if (($Attackers[$OuterCount]['Position'] + $Defenders[$InnerCount]['Position']) <= $Attackers[$OuterCount]['Range']) {
+
+                                    // Attack and calculate kills
+                                    $Defenders[$InnerCount]['DeathsLastRound'] = floor((($Attackers[$OuterCount]['Total Units'] * $Attackers[$OuterCount]['Attack']) / $Defenders[$InnerCount]['Hitpoints']));
+
+                                    // Calculate remaining units
+                                    $Defenders[$InnerCount]['Total Units'] -= $Defenders[$InnerCount]['DeathsLastRound'];
+
+                                    // Check if unit is dead and set to 0.
+                                    if ($Defenders[$InnerCount]['Total Units'] < 0) {
+                                        $Defenders[$InnerCount]['DeathsLastRound'] += $Defenders[$InnerCount]['Total Units'];
+                                        $Defenders[$InnerCount]['Total Units'] = 0;
+                                    }
+
+                                    // Deduct deaths from total
+                                    $DefendersTotal -= $Defenders[$InnerCount]['DeathsLastRound'];
+
+                                } else { // Move Phrase
+
+                                    // Move Unit´s Range by deducting it from its current position.
+                                    $Attackers[$OuterCount]['Position'] -= $Attackers[$OuterCount]['Speed'];
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+// Counts how many Defending Unit Types there is, and if the type have any units in them.
+
+                for ($OuterCount = 0; $OuterCount < count($Defenders); $OuterCount++) {
+                    if ($Defenders[$OuterCount]['Total Units'] > 0) {
+
+                        // Counts how many Attacking Unit types there is, and if the type have any units in them.
+                        for ($InnerCount = 0; $InnerCount < count($Attackers); $InnerCount++) {
+                            if ($Attackers[$InnerCount]['Total Units'] > 0) {
+
+                                // Checks each attacking units against all defending units of their in range or not
+                                // If there in range, it will attack, if not, then it will move closer and end its turn.
+                                if (($Defenders[$OuterCount]['Position'] + $Attackers[$InnerCount]['Position']) <= $Defenders[$OuterCount]['Range']) {
+
+                                    // Attack and calculate kills
+                                    $Attackers[$InnerCount]['DeathsLastRound'] = floor((($Defenders[$OuterCount]['Total Units'] * $Defenders[$OuterCount]['Attack']) / $Attackers[$InnerCount]['Hitpoints']));
+
+                                    // Calculate remaining units
+                                    $Attackers[$InnerCount]['Total Units'] -= $Attackers[$InnerCount]['DeathsLastRound'];
+
+                                    // Check if unit is dead and set to 0.
+                                    if ($Attackers[$InnerCount]['Total Units'] < 0) {
+                                        $Attackers[$InnerCount]['DeathsLastRound'] += $Attackers[$InnerCount]['Total Units'];
+                                        $Attackers[$InnerCount]['Total Units'] = 0;
+                                    }
+
+                                    // Deduct deaths from total
+                                    $AttackersTotal -= $Attackers[$InnerCount]['DeathsLastRound'];
+
+                                } else {
+
+                                    // Move Unit´s Range by deducting it from its current position.
+                                    $Defenders[$OuterCount]['Position'] -= $Defenders[$OuterCount]['Speed'];
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+
 
 
 
