@@ -58,12 +58,12 @@
                 <div class="col-xs-6">
                     <input type="number" name="D_Unit_1" placeholder="0" value="<?php echo $_POST['D_Unit_1'] ?>" required="yes"><br>
                     <input type="number" name="D_Unit_2" placeholder="0" value="<?php echo $_POST['D_Unit_2'] ?>" required="yes"><br>
-                    <input type="number" name="D_Unit_3" placeholder="0" value="<?php echo $_POST['A_Unit_3'] ?>" required="yes">
+                    <input type="number" name="D_Unit_3" placeholder="0" value="<?php echo $_POST['D_Unit_3'] ?>" required="yes">
                 </div>
             </div>
         </form>
     </div>
-</div>
+</div> <!-- End Row -->
 
 
 <div class="row">
@@ -92,11 +92,11 @@
             while ($row = mysqli_fetch_array($result)) {
                 $rowcount++;
                 $Attackers[] = $row;
-                $Attackers[$rowcount]['Total Units'] = $AttackingUnits[$rowcount];
+                $Attackers[$rowcount]['TotalUnits'] = $AttackingUnits[$rowcount];
                 $AttackersTotal = $AttackersTotal + $AttackingUnits[$rowcount];
 
                 $Defenders[] = $row;
-                $Defenders[$rowcount]['Total Units'] = $DefendingUnits[$rowcount];
+                $Defenders[$rowcount]['TotalUnits'] = $DefendingUnits[$rowcount];
                 $DefendersTotal = $DefendersTotal + $DefendingUnits[$rowcount];
             }
 
@@ -154,20 +154,24 @@
                 /**
                  * Setting variables for the Results Window
                  */
-
-
+/*
+                echo "<pre>";
+                echo print_r($Attackers);
+                echo "</pre>";
+*/
                 // Increase Round for each run
                 $round++;
+
                 echo "<tr>";
                 echo "<td>";
                 for ($Count = 0; $Count < count($Attackers); $Count++) {
-                    echo $Attackers[$Count]['Name'] . ": " . $Attackers[$Count]['Total Units'] . "<br>";
+                    echo $Attackers[$Count]['Name'] . ": " . $Attackers[$Count]['TotalUnits'] . "(" . $Attackers[$Count]['Position'] . ")" . "<br>";
                 }
                 echo "</td>";
                 echo "<td>";
                 for ($Count = 0; $Count < count($Attackers); $Count++) {
                     echo floor(isset($Attackers[$Count]['DeathsLastRound']) ? $Attackers[$Count]['DeathsLastRound'] : 0) . "<br>";
-                    if ($Attackers[$Count]['Total Units'] == 0 && (isset($Attackers[$Count]['DeathsLastRound']))) {
+                    if ($Attackers[$Count]['TotalUnits'] == 0 && (isset($Attackers[$Count]['DeathsLastRound']))) {
                         $Attackers[$Count]['DeathsLastRound'] = 0;
                     }
                 }
@@ -175,13 +179,13 @@
                 echo "<td>" . $round . "</td>";
                 echo "<td>";
                 for ($Count = 0; $Count < count($Defenders); $Count++) {
-                    echo $Defenders[$Count]['Name'] . ": " . $Defenders[$Count]['Total Units'] . "<br>";
+                    echo $Defenders[$Count]['Name'] . ": " . $Defenders[$Count]['TotalUnits'] . "(" . $Defenders[$Count]['Position'] . ")" . "<br>";
                 }
                 echo "</td>";
                 echo "<td>";
                 for ($Count = 0; $Count < count($Attackers); $Count++) {
                     echo floor(isset($Defenders[$Count]['DeathsLastRound']) ? $Defenders[$Count]['DeathsLastRound'] : 0) . "<br>";
-                    if ($Defenders[$Count]['Total Units'] == 0 && (isset($Defenders[$Count]['DeathsLastRound']))) {
+                    if ($Defenders[$Count]['TotalUnits'] == 0 && (isset($Defenders[$Count]['DeathsLastRound']))) {
                         $Defenders[$Count]['DeathsLastRound'] = 0;
                     }
                 }
@@ -193,28 +197,87 @@
         }//end submit();
 
         ?>
-    </div>
+    </div> <!-- Div with While class -->
     <script>
         $(function(){
-            $("#Rounds").dataTable();
+            $('#Rounds').dataTable( {
+                "order": [[ 2, "asc" ]],
+                "aLengthMenu": [[0, 5, 10, 25, -1], [0, 5, 10, 25, "All"]],
+                "iDisplayLength": 0
+            } );
         })
     </script>
-</div>
+</div> <!-- End Row -->
 
 
 <div class="row">
-    <div class="col-xs-8 col-xs-offset-2">
-        <div class="col-xs-12 well">
-        howdy
-        <?php
-        echo "<p>";
-        echo $Defenders[1]['Total Units'];
-        echo "</p>";
+    <div class="col-xs-8 col-md-offset-2 ReportWindow">
+            <div class="col-xs-6 text-center">
+                <h2>Attackers</h2>
+                <div class="col-xs-12 innerresults">
+                        <?php
+                        echo "<table class='table'>";
+                        echo "<thead>";
+                        echo "<tr>" . "<th>Troop</th>" . "<th>Amount</th>" . "<th>Casualty</th>" . "</tr>";
+                        echo "</thead>";
+                        echo "<tbody>";
+                        if (isset($Attackers)) {
+                            for ($Count = 0; $Count < count($Attackers); $Count++) {
+                                if ($Attackers[$Count]['TotalUnits'] + $Attackers[$Count]['TotalDeaths'] != 0) {
+                                    echo "<tr>";
+                                    echo "<td>";
+                                    echo $Attackers[$Count]['Name'];
+                                    echo "</td>";
+                                    echo "<td>";
+                                    echo $Attackers[$Count]['TotalUnits'] += $Attackers[$Count]['TotalDeaths'];
+                                    echo "</td>";
+                                    echo "<td>";
+                                    echo $Attackers[$Count]['TotalDeaths'];
+                                    echo "</td>";
+                                    echo "</tr>";
+                                }
+                            }
+                        }
+                        echo "</tbody>";
+                        echo "</table>";
+                        ?>
+                </div>
+            </div>
 
-        ?>
-        </div>
+            <div class="col-xs-6 text-center">
+                <h2>Defenders</h2>
+                <div class="col-xs-12 innerresults">
+                        <?php
+                        echo "<table class='table'>";
+                        echo "<thead>";
+                        echo "<tr>" . "<th>Troop</th>" . "<th>Amount</th>" . "<th>Casualty</th>" . "</tr>";
+                        echo "</thead>";
+                        echo "<tbody>";
+                        if (isset($Defenders)) {
+                            for ($Count = 0; $Count < count($Defenders); $Count++) {
+                                if ($Defenders[$Count]['TotalUnits'] + $Defenders[$Count]['TotalDeaths'] != 0) {
+                                    echo "<tr>";
+                                    echo "<td>";
+                                    echo $Defenders[$Count]['Name'];
+                                    echo "</td>";
+                                    echo "<td>";
+                                    echo $Defenders[$Count]['TotalUnits'] += $Defenders[$Count]['TotalDeaths'];
+                                    echo "</td>";
+                                    echo "<td>";
+                                    echo $Defenders[$Count]['TotalDeaths'];
+                                    echo "</td>";
+                                    echo "</tr>";
+                                }
+                            }
+                        }
+                        echo "</tbody>";
+                        echo "</table>";
+                        ?>
+                </div>
+            </div>
     </div>
 </div>
+<!-- End Row -->
 
 
 </body>
